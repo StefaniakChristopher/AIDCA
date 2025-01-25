@@ -1,6 +1,6 @@
 import { StyleSheet, Image, Platform, Text} from 'react-native';
 
-
+import { getLoadedFonts, useFonts } from 'expo-font';
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -9,6 +9,9 @@ import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function TabTwoScreen() {
+
+
+  console.log(getLoadedFonts());
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -24,7 +27,7 @@ export default function TabTwoScreen() {
         <ThemedText type="title">Explore</ThemedText>
       </ThemedView>
       <ThemedText >This app includes example code to help you get started.</ThemedText>
-      <Text className=' text-9xl text-pink-500'>HELdL</Text>
+      <Text className="[color:var(--color-blue)] text-9xl [font-family:'ClimateCrisis']">HELdL</Text>
       <Collapsible title="File-based routing">
         <ThemedText>
           This app has two screens:{' '}
