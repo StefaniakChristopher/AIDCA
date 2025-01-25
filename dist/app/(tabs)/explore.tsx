@@ -1,4 +1,5 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import { StyleSheet, Image, Platform, Text} from 'react-native';
+
 
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
@@ -22,7 +23,8 @@ export default function TabTwoScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Explore</ThemedText>
       </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
+      <ThemedText >This app includes example code to help you get started.</ThemedText>
+      <Text className=' text-9xl text-pink-500'>HELdL</Text>
       <Collapsible title="File-based routing">
         <ThemedText>
           This app has two screens:{' '}
