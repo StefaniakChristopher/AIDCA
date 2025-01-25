@@ -1,14 +1,13 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-import { verifyInstallation } from 'nativewind';
+import { Tabs } from "expo-router";
+import React from "react";
+import { Platform, TouchableOpacity } from "react-native";
+import { verifyInstallation } from "nativewind";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import EvilIcons from "@expo/vector-icons/EvilIcons";
+import Feather from "@expo/vector-icons/Feather";
+import { COLORS } from "@/constants/Colors";
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
+// home indicator color can't be changed because apple sucks
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -17,30 +16,59 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarLabel: () => null,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
+            position: "absolute",
+            justifyContent: "space-between", 
+            flex: 1,   
+            alignItems: 'center',
+            paddingTop: 15, 
+            backgroundColor: COLORS.backupColor,     
+            safeAreaInsets: { bottom: 0 },    
           },
-          default: {},
-        }),
-      }}>
+          default: {
+            justifyContent: 'center',            
+            alignItems: 'center',         
+      },
+    }),
+  }}
+>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Feather
+              name="home"
+              size={24}
+              color={focused ? "white" : "rgba(255,255,255,0.6)"}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Feather
+              name="crosshair"
+              size={24}
+              color={focused ? "white" : "rgba(255,255,255,0.6)"}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <EvilIcons
+              name="gear"
+              size={28}
+              color={focused ? "white" : "rgba(255,255,255,0.6)"}
+            />
+          ),
         }}
       />
     </Tabs>
