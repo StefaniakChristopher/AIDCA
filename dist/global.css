@@ -2,9 +2,3 @@
 @tailwind components;
 @tailwind utilities;
 
-*, :root {
-  --background-primary: #01295F; 
-  --background-secondary: #559BEB; 
-  --font-color-primary: #F15BB5;
-  --color-white: #21FA90;
-}

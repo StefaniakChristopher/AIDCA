@@ -8,6 +8,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { COLORS } from "@/constants/Colors";
 
 // home indicator color can't be changed because apple sucks
+// Tabs componeent doesnt use nativewind bc it also sucks so colors are maintained in Color.ts
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 

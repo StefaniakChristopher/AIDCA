@@ -1,15 +1,19 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+
+const username = 'User';
 
 const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.logo}>AIDA</Text>
-        <Text style={styles.galleryText}>Gallery</Text>
+      <View className=" flex flex-row justify-between items-center p-6">
+        <Text className="text-4xl [font-family:'ClimateCrisis'] text-fontColorPrimary">AIDA</Text>
+        <View className=" flex items-end">
+          <Text className=" text-backgroundSecondary text-xl [font-family:'Inter'] font-light ">Welcome, {username}!</Text>
+          <Text className="text-white text-2xl [font-family:'Inter'] font-bold ">Gallery</Text>
+        </View>
       </View>
 
       {/* Grid */}
