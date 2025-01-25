@@ -4,9 +4,12 @@ import { getLoadedFonts, useFonts } from 'expo-font';
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
+import Feather from '@expo/vector-icons/Feather';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
+
 
 export default function TabTwoScreen() {
 
@@ -24,7 +27,7 @@ export default function TabTwoScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
+        <ThemedText type="title">Explore<Feather name="crosshair" size={24} color="white" /><Feather name="home" size={24} color="white" /><EvilIcons name="gear" size={24} color="white" /></ThemedText>
       </ThemedView>
       <ThemedText >This app includes example code to help you get started.</ThemedText>
       <Text className="[color:var(--color-blue)] text-9xl [font-family:'ClimateCrisis']">HELdL</Text>
