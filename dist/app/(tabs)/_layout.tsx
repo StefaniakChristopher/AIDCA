@@ -49,7 +49,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="upload"
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Feather

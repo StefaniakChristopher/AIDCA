@@ -10,7 +10,7 @@ module.exports = {
         backgroundSecondary: "#559BEB",
         fontColorPrimary: "#F15BB5",
         fontColorSecondary: "#21FA90",
-        backupColor: "013F93"
+        backupColor: "#013F93"
       }
     },
   },
