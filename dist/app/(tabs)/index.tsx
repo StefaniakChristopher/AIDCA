@@ -1,31 +1,63 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // replace with actual username call
 const username = 'User';
 
+const images = [
+  { id: 1, uri: require('@/assets/images/A.jpg'), label: 'AI' },
+  { id: 2, uri: require('@/assets/images/B.png'), label: 'Not AI' },
+  { id: 3, uri: require('@/assets/images/C.jpg'), label: 'AI' },
+  // Add more images as needed
+];
+
+
+const distributeImages = (images: any) => {
+  const thinCards: any = [];
+  const thickCards: any = [];
+
+  images.forEach((image: any, index: any) => {
+    if (index % 2 === 0) {
+      thinCards.push(image);
+    } else {
+      thickCards.push(image);
+    }
+  });
+
+  return { thinCards, thickCards };
+};
+
+const { thinCards, thickCards } = distributeImages(images);
+
+const getRandomHeight = (min: number, max: number): number => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 const App = () => {
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className='flex-1 bg-backgroundPrimary'>
       {/* Header */}
-      <View className=" flex flex-row justify-between items-center p-6">
+      <View className=" flex flex-row justify-between items-center px-6 pt-6">
         <Text className="text-4xl [font-family:'ClimateCrisis'] text-fontColorPrimary">AIDA</Text>
         <View className=" flex items-end">
           <Text className=" text-backgroundSecondary text-xl [font-family:'Inter'] font-light ">Welcome, {username}!</Text>
           <Text className="text-white text-2xl [font-family:'Inter'] font-bold ">Gallery</Text>
         </View>
       </View>
+      <View className=' h-[0.25px] bg-black my-4'></View>
 
       {/* Grid */}
-      <View style={styles.grid}>
-        <View style={styles.cardRow}>
-          <Card label="10% AI" isChecked={false} />
-          <Card label="95% AI" isChecked={true} />
+      <View className=' flex flex-row justify-between mt-8 mx-1'>
+        <View className=' flex flex-col' >
+          {thinCards.map((image: any) => (
+            <ThinCard key={image.id} label={image.label} isChecked={true} imageUrl={image.uri} />
+          ))}
         </View>
-        <View style={styles.cardRow}>
-          <Card label="10% AI" isChecked={false} />
-          <Card label="10% AI" isChecked={false} />
+        <View className=' flex flex-col' >
+          {thickCards.map((image: any) => (
+            <ThickCard key={image.id} label={image.label} isChecked={false} imageUrl={image.uri} />
+          ))}
         </View>
       </View>
 
@@ -35,84 +67,49 @@ const App = () => {
 };
 
 // @ts-ignore
-const Card = ({ label, isChecked }) => (
-  <View style={styles.card}>
-    <Text style={[styles.label, isChecked ? styles.checked : styles.unchecked]}>
-      {isChecked ? '✔ ' : '✖ '}
-      {label}
-    </Text>
-  </View>
-);
+const ThinCard = ({ label, isChecked, imageUrl }) => {
+  const [height, setHeight] = useState(0);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#001a4d',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-  },
-  logo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ff3399',
-  },
-  galleryText: {
-    fontSize: 18,
-    color: '#fff',
-  },
-  grid: {
-    flex: 1,
-    padding: 16,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  card: {
-    flex: 1,
-    height: 120,
-    backgroundColor: '#80bfff',
-    borderRadius: 8,
-    marginHorizontal: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  checked: {
-    color: '#ff3399',
-  },
-  unchecked: {
-    color: '#33cc33',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
-  },
-  button: {
-    backgroundColor: '#ff3399',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  navbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#003366',
-    paddingVertical: 10,
-  },
-});
+  
+    // useEffect(() => {
+    //   Image.getSize(imageUrl, (width, height) => {
+    //     setHeight(height);
+    //   });
+    // }, [imageUrl]);
+  
+
+  return (
+    <ImageBackground source={imageUrl} style={{ height: getRandomHeight(100, 200)}} className=' bg-backgroundSecondary rounded-lg m-4 w-40 flex justify-end items-end' >
+      <Text>
+        {isChecked ? '✔ ' : '✖ '}
+        {label}
+      </Text>
+    </ImageBackground>
+  );
+};
+
+// @ts-ignore
+const ThickCard = ({ label, isChecked, imageUrl }) => {
+  const [height, setHeight] = useState(0);
+
+
+  // useEffect(() => {
+  //   Image.getSize(imageUrl, (width, height) => {
+  //     setHeight(height);
+  //   });
+  // }, [imageUrl]);
+
+  return (
+    <ImageBackground source={imageUrl} style={{ height: getRandomHeight(100, 200) }} className=' bg-backgroundSecondary rounded-lg m-4 w-56 flex justify-end items-end'>
+      <Text >
+        {isChecked ? '✔ ' : '✖ '}
+        {label}
+      </Text>
+    </ImageBackground>
+  );
+
+}
+
+
 
 export default App;
