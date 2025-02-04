@@ -83,16 +83,12 @@ export default function UploadScreen() {
             </View>
           </View>
         ) : (
-          <View className="h-12 flex flex-row items-end">
-            <Text className=" [font-family:'ClimateCrisis'] text-4xl text-fontColorSecondary">
-              Upload Image
-            </Text>
-          </View>
+          <></>
         )}
       </View>
-      <View className="flex flex-col items-center justify-between bg-fontColorSecondary p-4 mt-4 rounded-lg h-[650px] w-[400px]">
+      <View >
         {selectedImage ? (
-          <View>
+          <View className="flex flex-col items-center justify-between bg-fontColorSecondary p-4 mt-4 rounded-lg h-[650px] w-[400px]">
             <Image
               source={{ uri: selectedImage }}
               className="w-[350px] h-[270px] rounded-lg mt-4"
@@ -116,11 +112,7 @@ export default function UploadScreen() {
           </View>
         ) : (
           <>
-            <Image
-              source={logo}
-              className="rounded-lg h-[325px] w-[350px] mt-4"
-            />
-            <View className="flex flex-col items-center justify-center h-[50%]">
+            <View className="flex flex-col items-center justify-center">
               <TouchableOpacity
                 onPress={takeImage}
                 className=" bg-fontColorPrimary p-4 rounded-lg flex-row mt-6 mb items-center"
