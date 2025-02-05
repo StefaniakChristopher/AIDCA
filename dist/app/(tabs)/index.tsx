@@ -1,17 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ImageBackground,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+
+
+
+
 
 // replace with actual username call
-const username = 'User';
+const username = "User";
 
 const images = [
-  { id: 1, uri: require('@/assets/images/A.jpg'), label: 'AI' },
-  { id: 2, uri: require('@/assets/images/B.png'), label: 'Not AI' },
-  { id: 3, uri: require('@/assets/images/C.jpg'), label: 'AI' },
+  { id: 1, uri: require("@/assets/images/A.jpg"), label: "95" },
+  { id: 2, uri: require("@/assets/images/B.png"), label: "10" },
+  { id: 3, uri: require("@/assets/images/C.jpg"), label: "10" },
   // Add more images as needed
 ];
-
 
 const distributeImages = (images: any) => {
   const thinCards: any = [];
@@ -36,32 +49,46 @@ const getRandomHeight = (min: number, max: number): number => {
 
 const App = () => {
   return (
-    <SafeAreaView className='flex-1 bg-backgroundPrimary'>
+    <SafeAreaView className="flex-1 bg-backgroundPrimary">
       {/* Header */}
       <View className=" flex flex-row justify-between items-center px-6 pt-6">
-        <Text className="text-4xl [font-family:'ClimateCrisis'] text-fontColorPrimary">AIDA</Text>
+        <Text className="text-4xl [font-family:'ClimateCrisis'] text-fontColorPrimary">
+          AIDA
+        </Text>
         <View className=" flex items-end">
-          <Text className=" text-backgroundSecondary text-xl [font-family:'Inter'] font-light ">Welcome, {username}!</Text>
-          <Text className="text-white text-2xl [font-family:'Inter'] font-bold ">Gallery</Text>
+          <Text className=" text-backgroundSecondary text-xl [font-family:'Inter'] font-light ">
+            Welcome, {username}!
+          </Text>
+          <Text className="text-white text-2xl [font-family:'Inter'] font-bold ">
+            Gallery
+          </Text>
         </View>
       </View>
-      <View className=' h-[0.25px] bg-black my-4'></View>
+      <View className=" h-[0.25px] bg-black my-4"></View>
 
       {/* Grid */}
-      <View className=' flex flex-row justify-between mt-8 mx-1'>
-        <View className=' flex flex-col' >
+      <View className=" flex flex-row justify-between mt-8 mx-1">
+        <View className=" flex flex-col">
           {thinCards.map((image: any) => (
-            <ThinCard key={image.id} label={image.label} isChecked={true} imageUrl={image.uri} />
+            <ThinCard
+              key={image.id}
+              label={image.label}
+              isChecked={true}
+              imageUrl={image.uri}
+            />
           ))}
         </View>
-        <View className=' flex flex-col' >
+        <View className=" flex flex-col">
           {thickCards.map((image: any) => (
-            <ThickCard key={image.id} label={image.label} isChecked={false} imageUrl={image.uri} />
+            <ThickCard
+              key={image.id}
+              label={image.label}
+              isChecked={false}
+              imageUrl={image.uri}
+            />
           ))}
         </View>
       </View>
-
-      
     </SafeAreaView>
   );
 };
@@ -70,20 +97,33 @@ const App = () => {
 const ThinCard = ({ label, isChecked, imageUrl }) => {
   const [height, setHeight] = useState(0);
 
-  
-    // useEffect(() => {
-    //   Image.getSize(imageUrl, (width, height) => {
-    //     setHeight(height);
-    //   });
-    // }, [imageUrl]);
-  
+  // useEffect(() => {
+  //   Image.getSize(imageUrl, (width, height) => {
+  //     setHeight(height);
+  //   });
+  // }, [imageUrl]);
 
   return (
-    <ImageBackground source={imageUrl} style={{ height: getRandomHeight(100, 200)}} className=' bg-backgroundSecondary rounded-lg m-4 w-40 flex justify-end items-end' >
-      <Text>
-        {isChecked ? '✔ ' : '✖ '}
-        {label}
-      </Text>
+    <ImageBackground
+      source={imageUrl}
+      style={{ height: getRandomHeight(100, 200) }}
+      imageStyle={{ borderRadius: 10 }}
+      className=" rounded-lg m-4 w-40 flex justify-end items-end"
+    >
+      <View
+        className={`${ 
+          label > 50
+            ? "bg-fontColorPrimary text-white"
+            : " bg-fontColorSecondary text-backgroundPrimary"
+        } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
+        >
+        {label > 50 ? <Ionicons name="checkmark-sharp" size={14} color="white"/> : <FontAwesome6 name="xmark" size={14} />}
+        <Text className={`ml-2 ${label > 50 ? "text-white" : "text-backgroundPrimary"}`}>
+          {label}%
+          AI
+        </Text>
+        
+      </View>
     </ImageBackground>
   );
 };
@@ -92,7 +132,6 @@ const ThinCard = ({ label, isChecked, imageUrl }) => {
 const ThickCard = ({ label, isChecked, imageUrl }) => {
   const [height, setHeight] = useState(0);
 
-
   // useEffect(() => {
   //   Image.getSize(imageUrl, (width, height) => {
   //     setHeight(height);
@@ -100,16 +139,30 @@ const ThickCard = ({ label, isChecked, imageUrl }) => {
   // }, [imageUrl]);
 
   return (
-    <ImageBackground source={imageUrl} style={{ height: getRandomHeight(100, 200) }} className=' bg-backgroundSecondary rounded-lg m-4 w-56 flex justify-end items-end'>
-      <Text >
-        {isChecked ? '✔ ' : '✖ '}
-        {label}
-      </Text>
-    </ImageBackground>
+    <View>
+      <ImageBackground
+        source={imageUrl}
+        style={{ height: getRandomHeight(100, 200) }}
+        imageStyle={{ borderRadius: 10 }}
+        className=" rounded-full m-4 w-56 flex justify-end items-end"
+      >
+        <View
+        className={`${ 
+          label > 50
+            ? "bg-fontColorPrimary text-white"
+            : " bg-fontColorSecondary text-backgroundPrimary"
+        } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
+        >
+        {label > 50 ? <Ionicons name="checkmark-sharp" size={14} color="white"/> : <FontAwesome6 name="xmark" size={14} />}
+        <Text className={`ml-2 ${label > 50 ? "text-white" : "text-backgroundPrimary"}`}>
+          {label}%
+          AI
+        </Text>
+        
+      </View>
+      </ImageBackground>
+    </View>
   );
-
-}
-
-
+};
 
 export default App;
