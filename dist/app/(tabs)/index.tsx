@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
   ImageBackground,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -19,10 +20,15 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 // replace with actual username call
 const username = "User";
 
+
+// example images
 const images = [
   { id: 1, uri: require("@/assets/images/A.jpg"), label: "95" },
   { id: 2, uri: require("@/assets/images/B.png"), label: "10" },
   { id: 3, uri: require("@/assets/images/C.jpg"), label: "10" },
+  { id: 4, uri: require("@/assets/images/D.png"), label: "10" },
+  { id: 5, uri: require("@/assets/images/E.jpg"), label: "10" },
+  { id: 6, uri: require("@/assets/images/F.jpg"), label: "10" },
   // Add more images as needed
 ];
 
@@ -66,36 +72,36 @@ const App = () => {
       </View>
       <View className=" h-[0.25px] bg-black my-4"></View>
 
-      {/* Grid */}
-      <View className=" flex flex-row justify-between mt-8 mx-1">
-        <View className=" flex flex-col">
-          {thinCards.map((image: any) => (
-            <ThinCard
-              key={image.id}
-              label={image.label}
-              isChecked={true}
-              imageUrl={image.uri}
-            />
-          ))}
+      {/* Masonry */}
+      <ScrollView>
+        <View className=" flex flex-row justify-between mx-1">
+          <View className=" flex flex-col">
+            {thinCards.map((image: any) => (
+              <ThinCard
+                key={image.id}
+                label={image.label}
+                isChecked={true}
+                imageUrl={image.uri}
+              />
+            ))}
+          </View>
+          <View className=" flex flex-col">
+            {thickCards.map((image: any) => (
+              <ThickCard
+                key={image.id}
+                label={image.label}
+                imageUrl={image.uri}
+              />
+            ))}
+          </View>
         </View>
-        <View className=" flex flex-col">
-          {thickCards.map((image: any) => (
-            <ThickCard
-              key={image.id}
-              label={image.label}
-              isChecked={false}
-              imageUrl={image.uri}
-            />
-          ))}
-        </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 // @ts-ignore
 const ThinCard = ({ label, isChecked, imageUrl }) => {
-  const [height, setHeight] = useState(0);
 
   // useEffect(() => {
   //   Image.getSize(imageUrl, (width, height) => {
@@ -106,7 +112,7 @@ const ThinCard = ({ label, isChecked, imageUrl }) => {
   return (
     <ImageBackground
       source={imageUrl}
-      style={{ height: getRandomHeight(100, 200) }}
+      style={{ height: getRandomHeight(100, 350) }}
       imageStyle={{ borderRadius: 10 }}
       className=" rounded-lg m-4 w-40 flex justify-end items-end"
     >
@@ -129,15 +135,7 @@ const ThinCard = ({ label, isChecked, imageUrl }) => {
 };
 
 // @ts-ignore
-const ThickCard = ({ label, isChecked, imageUrl }) => {
-  const [height, setHeight] = useState(0);
-
-  // useEffect(() => {
-  //   Image.getSize(imageUrl, (width, height) => {
-  //     setHeight(height);
-  //   });
-  // }, [imageUrl]);
-
+const ThickCard = ({ label, imageUrl }) => {
   return (
     <View>
       <ImageBackground

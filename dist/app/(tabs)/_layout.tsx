@@ -6,11 +6,15 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { COLORS } from "@/constants/Colors";
+import MasonryList from '@react-native-seoul/masonry-list';
+
+export const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 85 : 65;
 
 // home indicator color can't be changed because apple sucks
 // Tabs componeent doesnt use nativewind bc it also sucks so colors are maintained in Color.ts
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  ;
 
   verifyInstallation();
 
@@ -21,13 +25,13 @@ export default function TabLayout() {
         tabBarLabel: () => null,
         tabBarStyle: Platform.select({
           ios: {
-            position: "absolute",
+            height: TAB_BAR_HEIGHT,
             justifyContent: "space-between", 
-            flex: 1,   
+            bottom: 0 , 
             alignItems: 'center',
             paddingTop: 15, 
             backgroundColor: COLORS.backupColor,     
-            safeAreaInsets: { bottom: 0 },    
+            safeAreaInsets: { bottom: 15 },    
           },
           default: {
             justifyContent: 'center',            
