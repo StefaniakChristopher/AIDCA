@@ -6,7 +6,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { COLORS } from "@/constants/Colors";
-import MasonryList from '@react-native-seoul/masonry-list';
+
 
 export const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 85 : 65;
 
