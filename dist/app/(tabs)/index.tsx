@@ -12,14 +12,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-
-
-
-
+import { TAB_BAR_HEIGHT } from "./_layout";
 
 // replace with actual username call
 const username = "User";
-
 
 // example images
 const images = [
@@ -70,32 +66,34 @@ const App = () => {
           </Text>
         </View>
       </View>
-      <View className=" h-[0.25px] bg-black my-4"></View>
+      <View className=" h-[0.25px] bg-backgroundPrimary my-2"></View>
 
       {/* Masonry */}
-      <ScrollView>
-        <View className=" flex flex-row justify-between mx-1">
-          <View className=" flex flex-col">
-            {thinCards.map((image: any) => (
-              <ThinCard
-                key={image.id}
-                label={image.label}
-                isChecked={true}
-                imageUrl={image.uri}
-              />
-            ))}
+      <View className="flex-1">
+        <ScrollView contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT }}>
+          <View className=" flex flex-row justify-between mx-4">
+            <View className=" flex flex-col">
+              {thinCards.map((image: any) => (
+                <ThinCard
+                  key={image.id}
+                  label={image.label}
+                  isChecked={true}
+                  imageUrl={image.uri}
+                />
+              ))}
+            </View>
+            <View className=" flex flex-col">
+              {thickCards.map((image: any) => (
+                <ThickCard
+                  key={image.id}
+                  label={image.label}
+                  imageUrl={image.uri}
+                />
+              ))}
+            </View>
           </View>
-          <View className=" flex flex-col">
-            {thickCards.map((image: any) => (
-              <ThickCard
-                key={image.id}
-                label={image.label}
-                imageUrl={image.uri}
-              />
-            ))}
-          </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -112,23 +110,20 @@ const ThinCard = ({ label, isChecked, imageUrl }) => {
   return (
     <ImageBackground
       source={imageUrl}
-      style={{ height: getRandomHeight(100, 350) }}
+      style={{ height: getRandomHeight(150, 250) }}
       imageStyle={{ borderRadius: 10 }}
-      className=" rounded-lg m-4 w-40 flex justify-end items-end"
+      className=" rounded-lg m-1.5 w-40 flex justify-end items-end"
     >
       <View
-        className={`${ 
-          label > 50
+        className={`${label > 50
             ? "bg-fontColorPrimary text-white"
             : " bg-fontColorSecondary text-backgroundPrimary"
-        } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
-        >
-        {label > 50 ? <Ionicons name="checkmark-sharp" size={14} color="white"/> : <FontAwesome6 name="xmark" size={14} />}
+          } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
+      >
+        {label > 50 ? <Ionicons name="checkmark-sharp" size={14} color="white" /> : <FontAwesome6 name="xmark" size={14} />}
         <Text className={`ml-2 ${label > 50 ? "text-white" : "text-backgroundPrimary"}`}>
-          {label}%
-          AI
+          {label}% AI
         </Text>
-        
       </View>
     </ImageBackground>
   );
@@ -140,24 +135,23 @@ const ThickCard = ({ label, imageUrl }) => {
     <View>
       <ImageBackground
         source={imageUrl}
-        style={{ height: getRandomHeight(100, 200) }}
+        style={{ height: getRandomHeight(150, 250) }}
         imageStyle={{ borderRadius: 10 }}
-        className=" rounded-full m-4 w-56 flex justify-end items-end"
+        className="rounded-lg m-4 w-56 flex justify-end items-end"
       >
         <View
-        className={`${ 
-          label > 50
-            ? "bg-fontColorPrimary text-white"
-            : " bg-fontColorSecondary text-backgroundPrimary"
-        } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
+          className={`${label > 50
+              ? "bg-fontColorPrimary text-white"
+              : " bg-fontColorSecondary text-backgroundPrimary"
+            } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
         >
-        {label > 50 ? <Ionicons name="checkmark-sharp" size={14} color="white"/> : <FontAwesome6 name="xmark" size={14} />}
-        <Text className={`ml-2 ${label > 50 ? "text-white" : "text-backgroundPrimary"}`}>
-          {label}%
-          AI
-        </Text>
-        
-      </View>
+          {label > 50 ? <Ionicons name="checkmark-sharp" size={14} color="white" /> : <FontAwesome6 name="xmark" size={14} />}
+          <Text className={`ml-2 ${label > 50 ? "text-white" : "text-backgroundPrimary"}`}>
+            {label}%
+            AI
+          </Text>
+
+        </View>
       </ImageBackground>
     </View>
   );
