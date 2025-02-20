@@ -4,6 +4,7 @@ import { Platform, TouchableOpacity } from "react-native";
 import { verifyInstallation } from "nativewind";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Feather from "@expo/vector-icons/Feather";
 import { COLORS } from "@/constants/Colors";
 
@@ -71,6 +72,18 @@ export default function TabLayout() {
             <EvilIcons
               name="gear"
               size={28}
+              color={focused ? "white" : "rgba(255,255,255,0.6)"}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <FontAwesome
+              name="user"
+              size={24}
               color={focused ? "white" : "rgba(255,255,255,0.6)"}
             />
           ),

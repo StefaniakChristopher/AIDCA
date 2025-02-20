@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, Animated } from "react-native";
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, Animated, Modal, TextInput } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Feather from "@expo/vector-icons/Feather";
 import { useState } from "react";
@@ -8,9 +8,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Dimensions } from "react-native";
 import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
+import Constants from "expo-constants";
 
 const logo = require("@/assets/images/logo.png");
 const screenWidth = Dimensions.get("window").width;
+
+const getApiUrl = () => {
+  if (Constants.expoConfig?.hostUri) {
+    const localIp = Constants.expoConfig.hostUri.split(":").shift();
+    return `http://${localIp}:3001`;
+  }
+  return "";
+};
+
+const API_URL = getApiUrl();
 
 export default function UploadScreen() {
   const viewShotRef = useRef<ViewShot>(null);
@@ -37,6 +48,10 @@ export default function UploadScreen() {
   const [aiPercent, setAiPercent] = useState<number>(0); // Default to 0 instead of null
   const [phrase, setPhrase] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false); // New state for loading screen
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [imageName, setImageName] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const takeImage = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -123,12 +138,64 @@ export default function UploadScreen() {
     }
   };
 
+  // Fun save image w confidence score and name, will manipulate later to contain heatmap and tie to user perchance
+  const saveImage = async () => {
+    if (!selectedImage || !imageName.trim()) {
+        alert("Please enter an image name and select an image.");
+        return;
+    }
+
+    setIsUploading(true); //Stole this screen from Claire (it look v v good)
+
+    console.log("saveImage function called!");
+    console.log("Selected Image:", selectedImage);
+    console.log("Image Name:", imageName);
+    console.log("AI Confidence Score:", aiPercent);
+
+    const formData = new FormData();
+    formData.append("imageName", imageName.trim());
+    formData.append("confidenceScore", aiPercent.toString());
+    formData.append("image", {
+        uri: selectedImage,
+        type: "image/jpeg",
+        name: `${imageName.trim()}.jpg`,
+    } as any);
+
+    try {
+        console.log("Uploading to:", API_URL);
+
+        const response = await fetch(`${API_URL}/upload`, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            console.log("Upload Success:", result);
+            alert("Image and data uploaded successfully!");
+            setSelectedImage(null);
+        } else {
+            console.error("Upload Failed:", result.error);
+            alert("Upload failed: " + result.error);
+        }
+    } catch (error) {
+        console.error("Upload error:", error);
+        alert("Error uploading image.");
+    } finally {
+        setIsUploading(false);
+    }
+};
+ 
   return (
     <View className="flex-1 items-center bg-backgroundPrimary">
-      {isProcessing ? (
+      {isProcessing || isUploading ? (
         // Loading Screen
         <View className="flex-1 w-full justify-center items-center bg-fontColorSecondary">
-          <Text className="mb-4 text-2xl text-backgroundPrimary [font-family:'ClimateCrisis']">Preprocessing...</Text>
+          <Text className="mb-4 text-2xl text-backgroundPrimary [font-family:'ClimateCrisis']">
+          {isUploading ? "Uploading..." : "Preprocessing..."}</Text>
           <ActivityIndicator size="large" color="backgroundPrimary" />
           <Image source={logo} className="rounded-lg  w-[75.4px] h-[70px] mt-10" />
         </View>
@@ -153,7 +220,7 @@ export default function UploadScreen() {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      onPress={() => setSelectedImage(null)}
+                      onPress={() => setIsModalVisible(true)}
                       className="bg-fontColorPrimary rounded-lg px-5 py-2 flex justify-center items-center"
                     >
                       <Text className="[font-family:'Inter'] text-white text-xl">Save</Text>
@@ -163,7 +230,62 @@ export default function UploadScreen() {
               </SafeAreaView>
             ) : (
               <></>
+
+              // Modal for popup when saving the image
             )}
+            {isModalVisible && (
+            <Modal animationType="fade" transparent visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
+              {/*Background*/}
+              <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+                {/*Content*/}
+                <View style={{ backgroundColor: "white", padding: 30, borderRadius: 20, width: 350 }}>
+                  <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "left" }}>Enter Image Name</Text>
+
+                  {/*Input section*/}
+                  <TextInput
+                    style={{ borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 5, marginBottom: 15 }}
+                    value={imageName}
+                    onChangeText={(text) => {
+                      setImageName(text);
+                      setErrorMessage(null);
+                    }}
+                  />
+                  {/*Buttons*/}
+                  <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+                    {/*Cancel button*/}
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsModalVisible(false);
+                        setErrorMessage(null);
+                      }}
+                      style={{ paddingVertical: 10, paddingHorizontal: 20, borderRadius: 5, width: 100, alignItems: "center"}}
+                    >
+                      <Text style={{ color: "#007AFF", fontSize: 16, fontWeight: "bold" }}>Cancel</Text>
+                    </TouchableOpacity>
+                    {/*Save button*/}
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (!imageName.trim()) {
+                          setErrorMessage("Please enter a valid name for your image.");
+                        } else {
+                          setIsModalVisible(false);
+                          saveImage();
+                          setImageName("");
+                          console.log("Image Name:", imageName);
+                          setErrorMessage(null);
+                        }
+                      }}
+                      style={{ backgroundColor: "#F15BB5", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 5, width: 100, alignItems: "center" }}
+                    >
+                      <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>Save</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {/*Error message*/}
+                  {errorMessage && <Text style={{ color: "red", fontSize: 14, marginTop: 10, textAlign: "center" }}>{errorMessage}</Text>}
+                </View>
+              </View>
+            </Modal>
+          )}
           </View>
           <View>
             {selectedImage ? (
