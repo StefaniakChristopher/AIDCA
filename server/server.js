@@ -35,7 +35,7 @@ const s3 = new S3Client({
   },
 });
 
-// Configure Multer to Upload to S3
+// Configure Multer to Upload to S3, configures a location property that has the location of the image in S3
 const upload = multer({
     storage: multerS3({
       s3: s3,
@@ -101,6 +101,23 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   } catch (error) {
       console.error("Upload Error:", error);
       res.status(500).json({ error: "Error uploading image" });
+  }
+});
+
+// retrieve images for the gallery
+app.get("/images", async (req, res) => {
+  try {
+    // Adjust the query as needed to match your database schema.
+    const imageQuery = `
+      SELECT i.image_id, i.file_path, a.confidence_score
+      FROM image i
+      JOIN analysis_log a ON i.image_id = a.image_id;
+    `;
+    const result = await pool.query(imageQuery);
+    res.json({ images: result.rows });
+  } catch (error) {
+    console.error("Error fetching images:", error);
+    res.status(500).json({ error: "Error retrieving images" });
   }
 });
 

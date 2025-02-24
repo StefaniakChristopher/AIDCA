@@ -14,43 +14,79 @@ import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { TAB_BAR_HEIGHT } from "./_layout";
 import { useRouter } from "expo-router";
+import HOST from "@/constants/Host";
+import axios from "axios";
 
 // replace with actual username call
 const username = "User";
 
+const fetchImageData = async () => {
+  try {
+    console.log("dogso")
+    const response = await axios.get(`${HOST}/images`);
+    console.log("Image data:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching image data:", error);
+  }
+};
+
+
+
+
 // example images
-const images = [
-  { id: 1, uri: require("@/assets/images/A.jpg"), label: "95" },
-  { id: 2, uri: require("@/assets/images/B.png"), label: "10" },
-  { id: 3, uri: require("@/assets/images/C.jpg"), label: "10" },
-  { id: 4, uri: require("@/assets/images/D.png"), label: "10" },
-  { id: 5, uri: require("@/assets/images/E.jpg"), label: "10" },
-  { id: 6, uri: require("@/assets/images/F.jpg"), label: "10" },
+const defaultImages = [
+  { image_id: 1, file_path: require("@/assets/images/A.jpg"), confidence_score: "95" },
+  { image_id: 2, file_path: require("@/assets/images/B.png"), confidence_score: "10" },
+  { image_id: 3, file_path: require("@/assets/images/C.jpg"), confidence_score: "10" },
+  { image_id: 4, file_path: require("@/assets/images/D.png"), confidence_score: "10" },
+  { image_id: 5, file_path: require("@/assets/images/E.jpg"), confidence_score: "10" },
+  { image_id: 6, file_path: require("@/assets/images/F.jpg"), confidence_score: "10" },
   // Add more images as needed
 ];
 
-const distributeImages = (images: any) => {
-  const thinCards: any = [];
-  const thickCards: any = [];
 
-  images.forEach((image: any, index: any) => {
-    if (index % 2 === 0) {
-      thinCards.push(image);
-    } else {
-      thickCards.push(image);
-    }
-  });
-
-  return { thinCards, thickCards };
-};
-
-const { thinCards, thickCards } = distributeImages(images);
 
 const getRandomHeight = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
 const App = () => {
+
+  const [images, setImages] = useState(defaultImages);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      try {
+        const data = await fetchImageData();
+        // Assuming your API returns an object like { images: [...] }
+        setImages(data); 
+      } catch (error) {
+        console.error("Error loading images:", error);
+      }
+    };
+  
+    loadImages();
+  }, []);
+
+  const distributeImages = (images: any) => {
+    const thinCards: any = [];
+    const thickCards: any = [];
+  
+    images.forEach((image: any, index: any) => {
+      if (index % 2 === 0) {
+        thinCards.push(image);
+      } else {
+        thickCards.push(image);
+      }
+    });
+  
+    return { thinCards, thickCards };
+  };
+  
+  const { thinCards, thickCards } = distributeImages(images);
+
+
   const router = useRouter();
   return (
     <SafeAreaView edges={['top', 'left', 'right']} className="flex-1 bg-backgroundPrimary">
@@ -79,19 +115,19 @@ const App = () => {
             <View className=" flex flex-col">
               {thinCards.map((image: any) => (
                 <ThinCard
-                  key={image.id}
-                  label={image.label}
+                  key={image.image_id}
+                  label={image.confidence_score}
                   isChecked={true}
-                  imageUrl={image.uri}
+                  imageUrl={image.file_path}
                 />
               ))}
             </View>
             <View className=" flex flex-col">
               {thickCards.map((image: any) => (
                 <ThickCard
-                  key={image.id}
-                  label={image.label}
-                  imageUrl={image.uri}
+                  key={image.image_id}
+                  label={image.confidence_score}
+                  imageUrl={image.file_path}
                 />
               ))}
             </View>
