@@ -51,7 +51,7 @@ const getRandomHeight = (min: number, max: number): number => {
 
 const App = () => {
   return (
-    <SafeAreaView className="flex-1 bg-backgroundPrimary">
+    <SafeAreaView edges={['top', 'left', 'right']} className="flex-1 bg-backgroundPrimary">
       {/* Header */}
       <View className=" flex flex-row justify-between items-center px-6 pt-6">
         <Text className="text-4xl [font-family:'ClimateCrisis'] text-fontColorPrimary">

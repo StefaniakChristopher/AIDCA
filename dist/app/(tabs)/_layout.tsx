@@ -30,8 +30,7 @@ export default function TabLayout() {
             bottom: 0 , 
             alignItems: 'center',
             paddingTop: 15, 
-            backgroundColor: COLORS.backupColor,     
-            safeAreaInsets: { bottom: 15 },    
+            backgroundColor: COLORS.backupColor,        
           },
           default: {
             justifyContent: 'center',            
