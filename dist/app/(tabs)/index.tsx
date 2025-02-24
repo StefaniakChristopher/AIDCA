@@ -13,6 +13,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { TAB_BAR_HEIGHT } from "./_layout";
+import { useRouter } from "expo-router";
 
 // replace with actual username call
 const username = "User";
@@ -50,6 +51,7 @@ const getRandomHeight = (min: number, max: number): number => {
 };
 
 const App = () => {
+  const router = useRouter();
   return (
     <SafeAreaView edges={['top', 'left', 'right']} className="flex-1 bg-backgroundPrimary">
       {/* Header */}
@@ -57,10 +59,12 @@ const App = () => {
         <Text className="text-4xl [font-family:'ClimateCrisis'] text-fontColorPrimary">
           AIDA
         </Text>
-        <View className=" flex items-end">
-          <Text className=" text-backgroundSecondary text-xl [font-family:'Inter'] font-light ">
-            Welcome, {username}!
-          </Text>
+        {/* Changed for now to work on Sign Up page, will change back to read the user that is currently logged in*/}
+        <View className="flex items-end">
+          {/* Sign Up Button */}
+          <TouchableOpacity onPress={() => router.push("/signup")}>
+            <Text className="text-backgroundSecondary text-xl [font-family:'Inter'] font-light">Sign Up</Text>
+          </TouchableOpacity>
           <Text className="text-white text-2xl [font-family:'Inter'] font-bold ">
             Gallery
           </Text>
