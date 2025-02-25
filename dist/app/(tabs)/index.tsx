@@ -60,7 +60,7 @@ const App = () => {
       try {
         const data = await fetchImageData();
         // Assuming your API returns an object like { images: [...] }
-        setImages(data); 
+        setImages(data.images); 
       } catch (error) {
         console.error("Error loading images:", error);
       }
@@ -149,20 +149,20 @@ const ThinCard = ({ label, isChecked, imageUrl }) => {
 
   return (
     <ImageBackground
-      source={imageUrl}
+      source={{ uri : imageUrl }}
       style={{ height: getRandomHeight(150, 250) }}
       imageStyle={{ borderRadius: 10 }}
       className=" rounded-lg m-1.5 w-40 flex justify-end items-end"
     >
       <View
-        className={`${label > 50
+        className={`${label > 0.50
             ? "bg-fontColorPrimary text-white"
             : " bg-fontColorSecondary text-backgroundPrimary"
           } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
       >
-        {label > 50 ? <Ionicons name="checkmark-sharp" size={14} color="white" /> : <FontAwesome6 name="xmark" size={14} />}
-        <Text className={`ml-2 ${label > 50 ? "text-white" : "text-backgroundPrimary"}`}>
-          {label}% AI
+        {label > 0.50 ? <Ionicons name="checkmark-sharp" size={14} color="white" /> : <FontAwesome6 name="xmark" size={14} />}
+        <Text className={`ml-2 ${label > 0.5 ? "text-white" : "text-backgroundPrimary"}`}>
+          {label * 100}% AI
         </Text>
       </View>
     </ImageBackground>
@@ -174,20 +174,20 @@ const ThickCard = ({ label, imageUrl }) => {
   return (
     <View>
       <ImageBackground
-        source={imageUrl}
+        source={{ uri : imageUrl }}
         style={{ height: getRandomHeight(150, 250) }}
         imageStyle={{ borderRadius: 10 }}
         className="rounded-lg m-4 w-56 flex justify-end items-end"
       >
         <View
-          className={`${label > 50
+          className={`${label > 0.50
               ? "bg-fontColorPrimary text-white"
               : " bg-fontColorSecondary text-backgroundPrimary"
             } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
         >
-          {label > 50 ? <Ionicons name="checkmark-sharp" size={14} color="white" /> : <FontAwesome6 name="xmark" size={14} />}
-          <Text className={`ml-2 ${label > 50 ? "text-white" : "text-backgroundPrimary"}`}>
-            {label}%
+          {label > 0.50 ? <Ionicons name="checkmark-sharp" size={14} color="white" /> : <FontAwesome6 name="xmark" size={14} />}
+          <Text className={`ml-2 ${label > 0.50 ? "text-white" : "text-backgroundPrimary"}`}>
+            {label * 100}%
             AI
           </Text>
 

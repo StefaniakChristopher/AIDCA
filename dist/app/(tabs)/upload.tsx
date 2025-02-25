@@ -9,6 +9,7 @@ import { Dimensions } from "react-native";
 import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 import Constants from "expo-constants";
+import HOST from "@/constants/Host";
 
 const logo = require("@/assets/images/logo.png");
 const screenWidth = Dimensions.get("window").width;
@@ -162,9 +163,9 @@ export default function UploadScreen() {
     } as any);
 
     try {
-        console.log("Uploading to:", API_URL);
+        console.log("Uploading to:", HOST);
 
-        const response = await fetch(`${API_URL}/upload`, {
+        const response = await fetch(`${HOST}/upload`, {
             method: "POST",
             body: formData,
             headers: {
