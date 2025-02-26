@@ -162,7 +162,7 @@ const App = () => {
 
 // @ts-ignore
 const ThinCard = ({ label, isChecked, imageUrl }) => {
-  const [imageHeight, setImageHeight] = useState(200)
+  const [imageHeight, setImageHeight] = useState<number | null>(null)
 
   useEffect(() => {
     getImageHeight(imageUrl, 150).then((height) => {
@@ -196,7 +196,7 @@ const ThinCard = ({ label, isChecked, imageUrl }) => {
 
 // @ts-ignore
 const ThickCard = ({ label, imageUrl }) => {
-  const [imageHeight, setImageHeight] = useState(200)
+  const [imageHeight, setImageHeight] = useState<number | null>(null)
 
   useEffect(() => {
     getImageHeight(imageUrl, 150).then((height) => {
