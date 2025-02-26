@@ -20,6 +20,29 @@ import axios from "axios";
 // replace with actual username call
 const username = "User";
 
+const getImageHeight = (imageUrl: string, desiredWidth: number): Promise<number> => {
+  return new Promise((resolve) => {
+    if (typeof imageUrl === 'string') {
+      Image.getSize(
+        imageUrl,
+        (width, height) => {
+          // Calculate height while maintaining aspect ratio
+          const aspectRatio = width / height;
+          const calculatedHeight = desiredWidth / aspectRatio;
+          resolve(calculatedHeight);
+        },
+        (error) => {
+          console.error('Error getting image size:', error);
+          resolve(200); // Fallback height
+        }
+      );
+    } else {
+      // For local images (using require)
+      resolve(200); // Default height for local images
+    }
+  });
+};
+
 const fetchImageData = async () => {
   try {
     console.log("dogso")
@@ -47,9 +70,6 @@ const defaultImages = [
 
 
 
-const getRandomHeight = (min: number, max: number): number => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
 
 const App = () => {
 
@@ -68,6 +88,8 @@ const App = () => {
   
     loadImages();
   }, []);
+
+  
 
   const distributeImages = (images: any) => {
     const thinCards: any = [];
@@ -140,17 +162,20 @@ const App = () => {
 
 // @ts-ignore
 const ThinCard = ({ label, isChecked, imageUrl }) => {
+  const [imageHeight, setImageHeight] = useState(200)
 
-  // useEffect(() => {
-  //   Image.getSize(imageUrl, (width, height) => {
-  //     setHeight(height);
-  //   });
-  // }, [imageUrl]);
+  useEffect(() => {
+    getImageHeight(imageUrl, 150).then((height) => {
+      console.log("Calculated height:", height);
+      setImageHeight(height);
+    });
+  }, [imageUrl]);
 
+  console.log("Image URL:", getImageHeight(imageUrl, 150));
   return (
     <ImageBackground
       source={{ uri : imageUrl }}
-      style={{ height: getRandomHeight(150, 250) }}
+      style={{ height:  imageHeight}}
       imageStyle={{ borderRadius: 10 }}
       className=" rounded-lg m-1.5 w-40 flex justify-end items-end"
     >
@@ -171,11 +196,20 @@ const ThinCard = ({ label, isChecked, imageUrl }) => {
 
 // @ts-ignore
 const ThickCard = ({ label, imageUrl }) => {
+  const [imageHeight, setImageHeight] = useState(200)
+
+  useEffect(() => {
+    getImageHeight(imageUrl, 150).then((height) => {
+      console.log("Calculated height:", height);
+      setImageHeight(height);
+    });
+  }, [imageUrl]);
+
   return (
     <View>
       <ImageBackground
         source={{ uri : imageUrl }}
-        style={{ height: getRandomHeight(150, 250) }}
+        style={{ height: imageHeight }}
         imageStyle={{ borderRadius: 10 }}
         className="rounded-lg m-4 w-56 flex justify-end items-end"
       >
