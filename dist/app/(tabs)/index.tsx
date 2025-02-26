@@ -166,12 +166,11 @@ const ThinCard = ({ label, isChecked, imageUrl }) => {
 
   useEffect(() => {
     getImageHeight(imageUrl, 150).then((height) => {
-      console.log("Calculated height:", height);
       setImageHeight(height);
     });
   }, [imageUrl]);
 
-  console.log("Image URL:", getImageHeight(imageUrl, 150));
+  
   return (
     <ImageBackground
       source={{ uri : imageUrl }}
@@ -200,7 +199,6 @@ const ThickCard = ({ label, imageUrl }) => {
 
   useEffect(() => {
     getImageHeight(imageUrl, 150).then((height) => {
-      console.log("Calculated height:", height);
       setImageHeight(height);
     });
   }, [imageUrl]);
