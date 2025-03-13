@@ -4,6 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Constants from "expo-constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import HOST from "@/constants/Host"; // will need to replace logic below w thbis, currently not in use
 
 export default function SignUpScreen() {
   const [firstName, setFirstName] = useState("");
@@ -13,11 +16,6 @@ export default function SignUpScreen() {
   const [agree, setAgree] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-
-// This page is not done yet, still editing this as you read this most likely
-
-
-// Can edit this to fit what we want/make it less complicated maybe
   const validatePassword = (password: string) => {
     return {
       length: password.length >= 8,
@@ -30,6 +28,74 @@ export default function SignUpScreen() {
   const passwordValidation = validatePassword(password);
   const isPasswordValid = Object.values(passwordValidation).every(Boolean);
   const isFormValid = firstName && lastName && email && isPasswordValid && agree;
+
+  // Change/remove later when we get in server.js again
+const getApiUrl = () => {
+  if (Constants.expoConfig?.hostUri) {
+    const localIp = Constants.expoConfig.hostUri.split(":").shift();
+    return `http://${localIp}:3001`;
+  }
+  return "";
+};
+
+const HOST = getApiUrl();
+
+// Signup function
+const handleSignUp = async () => {
+  if (!isFormValid) return;
+
+  try {
+    const response = await fetch(`${HOST}/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ firstName, lastName, email, password }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // Automatically call the login function with the same credentials just used to create said acc
+      await handleLogin(email, password);
+    } else {
+      alert(result.error || "Signup failed.");
+    }
+  } catch (error) {
+    console.error("Signup error:", error);
+    alert("Signup failed: " + (error instanceof Error ? error.message : "Unknown error"));
+  }
+};
+
+// Login logicc
+const handleLogin = async (emailParam?: string, passwordParam?: string) => {
+  const emailToUse = emailParam || email;
+  const passwordToUse = passwordParam || password;
+
+  if (!emailToUse || !passwordToUse) return;
+
+  try {
+    const response = await fetch(`${HOST}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: emailToUse, password: passwordToUse }),
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert("Login successful!");
+
+      // Store token in AsyncStorage for use
+      await AsyncStorage.setItem("token", result.token);
+
+      // Redirect to the home page
+      router.push("/home");
+    } else {
+      alert(result.error);
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("Login failed: " + (error instanceof Error ? error.message : "Unknown error"));
+  }
+};
 
   return (
     <SafeAreaView className="flex-1 bg-backgroundPrimary p-6">
@@ -73,6 +139,7 @@ export default function SignUpScreen() {
         />
 
         {/* Password */}
+        <Text className="text-left text-2xl font-bold text-fontColorSecondary mb-4">Password</Text>
         <View className="bg-white p-4 rounded-md flex-row items-center mb-2">
           <TextInput
             className="flex-1"
@@ -118,6 +185,7 @@ export default function SignUpScreen() {
         <TouchableOpacity
           className={`mt-6 p-4 rounded-md ${isFormValid ? "bg-fontColorSecondary" : "bg-gray-400"}`}
           disabled={!isFormValid}
+          onPress={handleSignUp} // Connects button to signup function
         >
           <Text className="text-white text-center">Agree and continue</Text>
         </TouchableOpacity>
