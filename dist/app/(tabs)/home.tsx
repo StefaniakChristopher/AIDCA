@@ -10,15 +10,27 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { TAB_BAR_HEIGHT } from "./_layout";
 import { useRouter } from "expo-router";
-import HOST from "@/constants/Host";
+// import HOST from "@/constants/Host";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
+import Constants from "expo-constants";
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
-// replace with actual username call
-const username = "User";
+  // Change this later when back in server.js
+  const getApiUrl = () => {
+    if (Constants.expoConfig?.hostUri) {
+      const localIp = Constants.expoConfig.hostUri.split(":").shift();
+      return `http://${localIp}:3001`;
+    }
+    return "";
+  };
+  
+  const HOST = getApiUrl();
 
 const getImageHeight = (imageUrl: string, desiredWidth: number): Promise<number> => {
   return new Promise((resolve) => {
@@ -45,17 +57,23 @@ const getImageHeight = (imageUrl: string, desiredWidth: number): Promise<number>
 
 const fetchImageData = async () => {
   try {
-    console.log("dogso")
-    const response = await axios.get(`${HOST}/images`);
-    console.log("Image data:", response.data);
+    const token = await AsyncStorage.getItem("token");  //Retrieve JWT token
+    if (!token) {
+      console.error("No token found. User might not be logged in.");
+      return;
+    }
+    const response = await axios.get(`${HOST}/images`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,  
+        "Content-Type": "application/json",
+      },
+    });
+
     return response.data;
   } catch (error) {
     console.error("Error fetching image data:", error);
   }
 };
-
-
-
 
 // example images
 const defaultImages = [
@@ -68,29 +86,73 @@ const defaultImages = [
   // Add more images as needed
 ];
 
-
-
-
 const App = () => {
 
   const [images, setImages] = useState(defaultImages);
 
+  const [userFirstName, setUserFirstName] = useState("User");
+
+  // Function to fetch updated images when navigating back
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUpdatedImages = async () => {
+        try {
+          const data = await fetchImageData();
+          if (data && data.images) {
+            setImages(data.images);
+          }
+        } catch (error) {
+          console.error("Error fetching updated images:", error);
+        }
+      };
+      fetchUpdatedImages();
+    }, [])
+  );
+
+  // Used to grab users first name and display on the top of the home page, based on the id that is logged in
+  useEffect(() => {
+
+    const getUserFirstName = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+  
+        // Decode JWT token to get first_name
+        const decodedToken: any = jwtDecode(token);
+        if (decodedToken.first_name) {
+          setUserFirstName(decodedToken.first_name);
+        } else {
+          console.error("first_name not found in token.");
+        }
+      } catch (error) {
+        console.error("Error extracting user first name:", error);
+      }
+    };
+  
+    getUserFirstName();
+  }, []);
+  
   useEffect(() => {
     const loadImages = async () => {
       try {
         const data = await fetchImageData();
-        // Assuming your API returns an object like { images: [...] }
-        setImages(data.images); 
+        if (data && data.images) {
+          setImages(data.images);
+        } else {
+          console.error("No images found.");
+          setImages([]); // stays empty if no images exist
+        }
       } catch (error) {
         console.error("Error loading images:", error);
       }
     };
-  
+
     loadImages();
   }, []);
-
   
-
   const distributeImages = (images: any) => {
     const thinCards: any = [];
     const thickCards: any = [];
@@ -108,8 +170,8 @@ const App = () => {
   
   const { thinCards, thickCards } = distributeImages(images);
 
-
   const router = useRouter();
+
   return (
     <SafeAreaView edges={['top', 'left', 'right']} className="flex-1 bg-backgroundPrimary">
       {/* Header */}
@@ -117,12 +179,11 @@ const App = () => {
         <Text className="text-4xl [font-family:'ClimateCrisis'] text-fontColorPrimary">
           AIDA
         </Text>
-        {/* Changed for now to work on Sign Up page, will change back to read the user that is currently logged in*/}
+        {/* Show user’s first name */}
         <View className="flex items-end">
-          {/* Sign Up Button */}
-          <TouchableOpacity onPress={() => router.push("/signup")}>
-            <Text className="text-backgroundSecondary text-xl [font-family:'Inter'] font-light">Sign Up</Text>
-          </TouchableOpacity>
+          <Text className="text-white text-2xl [font-family:'Inter'] font-bold">
+            Welcome, {userFirstName}!
+          </Text>
           <Text className="text-white text-2xl [font-family:'Inter'] font-bold ">
             Gallery
           </Text>
@@ -130,31 +191,41 @@ const App = () => {
       </View>
       <View className=" h-[0.25px] bg-backgroundPrimary my-2"></View>
 
-      {/* Masonry */}
+      {/* Masonry Layout / No Images Message */}
       <View className="flex-1">
-        <ScrollView contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT }}>
-          <View className=" flex flex-row justify-between mx-4">
-            <View className=" flex flex-col">
-              {thinCards.map((image: any) => (
-                <ThinCard
-                  key={image.image_id}
-                  label={image.confidence_score}
-                  isChecked={true}
-                  imageUrl={image.file_path}
-                />
-              ))}
-            </View>
-            <View className=" flex flex-col">
-              {thickCards.map((image: any) => (
-                <ThickCard
-                  key={image.image_id}
-                  label={image.confidence_score}
-                  imageUrl={image.file_path}
-                />
-              ))}
-            </View>
+        {images.length === 0 ? (
+          // Show this when no images are found
+          <View className="flex-1 justify-center items-center">
+            <Text className="text-white text-2xl [font-family:'Inter'] font-bold">
+              Start testing to fill your gallery!
+            </Text>
           </View>
-        </ScrollView>
+        ) : (
+          // Show gallery if images exist
+          <ScrollView contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT }}>
+            <View className="flex flex-row justify-between mx-4">
+              <View className="flex flex-col">
+                {thinCards.map((image: any) => (
+                  <ThinCard
+                    key={image.image_id}
+                    label={image.confidence_score}
+                    isChecked={true}
+                    imageUrl={image.file_path}
+                  />
+                ))}
+              </View>
+              <View className="flex flex-col">
+                {thickCards.map((image: any) => (
+                  <ThickCard
+                    key={image.image_id}
+                    label={image.confidence_score}
+                    imageUrl={image.file_path}
+                  />
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        )}
       </View>
     </SafeAreaView>
   );

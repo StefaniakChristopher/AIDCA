@@ -9,11 +9,14 @@ import { Dimensions } from "react-native";
 import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 import Constants from "expo-constants";
-import HOST from "@/constants/Host";
+// import HOST from "@/constants/Host";
+import { jwtDecode } from "jwt-decode";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const logo = require("@/assets/images/logo.png");
 const screenWidth = Dimensions.get("window").width;
 
+// change back later
 const getApiUrl = () => {
   if (Constants.expoConfig?.hostUri) {
     const localIp = Constants.expoConfig.hostUri.split(":").shift();
@@ -22,7 +25,7 @@ const getApiUrl = () => {
   return "";
 };
 
-const API_URL = getApiUrl();
+const HOST = getApiUrl();
 
 export default function UploadScreen() {
   const viewShotRef = useRef<ViewShot>(null);
@@ -89,6 +92,7 @@ export default function UploadScreen() {
   };
   const slideAnim = useRef(new Animated.Value(50)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     if (!isProcessing) {
       fadeAnim.setValue(0);
@@ -146,36 +150,39 @@ export default function UploadScreen() {
         return;
     }
 
-    setIsUploading(true); //Stole this screen from Claire (it look v v good)
-
-    console.log("saveImage function called!");
-    console.log("Selected Image:", selectedImage);
-    console.log("Image Name:", imageName);
-    console.log("AI Confidence Score:", aiPercent);
-
-    const formData = new FormData();
-    formData.append("imageName", imageName.trim());
-    formData.append("confidenceScore", aiPercent.toString());
-    formData.append("image", {
-        uri: selectedImage,
-        type: "image/jpeg",
-        name: `${imageName.trim()}.jpg`,
-    } as any);
-
+    setIsUploading(true);
     try {
-        console.log("Uploading to:", HOST);
+        // Retrieve and decode the token so that the image gets tied to specific user
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+            alert("User not authenticated.");
+            setIsUploading(false);
+            return;
+        }
 
-        const response = await fetch(`${HOST}/upload`, {
+        const decodedToken: any = jwtDecode(token);
+        const userId = decodedToken.user_id;
+        const formData = new FormData();
+        formData.append("imageName", imageName.trim());
+        formData.append("confidenceScore", aiPercent.toString());
+        formData.append("userId", userId.toString()); // Send the user ID
+        formData.append("image", {
+            uri: selectedImage,
+            type: "image/jpeg",
+            name: `${imageName.trim()}.jpg`,
+        } as any);
+
+        const response = await fetch(`${HOST}/upload-test`, {
             method: "POST",
             body: formData,
             headers: {
+                "Authorization": `Bearer ${token}`,
                 "Content-Type": "multipart/form-data",
             },
         });
 
         const result = await response.json();
         if (result.success) {
-            console.log("Upload Success:", result);
             alert("Image and data uploaded successfully!");
             setSelectedImage(null);
         } else {

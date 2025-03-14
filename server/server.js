@@ -53,6 +53,7 @@ const upload = multer({
   
 
 // Upload Route (S3 + Database)
+// Update this with what is in auth.js for uploading to specific user
 app.post("/upload", upload.single("image"), async (req, res) => {
   try {
       console.log("Received upload request:", req.body);
@@ -105,6 +106,7 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 });
 
 // retrieve images for the gallery
+// replace this with whats in auth.js for image retrieve
 app.get("/images", async (req, res) => {
   try {
     // Adjust the query as needed to match your database schema.
