@@ -10,7 +10,7 @@ require("dotenv").config();
 const multer = require("multer");
 const { S3Client } = require("@aws-sdk/client-s3");
 const multerS3 = require("multer-s3");
-const axios = require("axios");
+const CopyObjectCommand = require("@aws-sdk/client-s3").CopyObjectCommand;
 
 
 
@@ -81,6 +81,46 @@ const upload = multer({
         next();
     });
 };
+
+async function copyImageInS3(sourceUri) {
+    try {
+        // Extract the bucket name and source key from the URI
+        const bucketName = process.env.AWS_S3_BUCKET;
+        const sourceKey = sourceUri.split("/").slice(3).join("/");
+        console.log(sourceKey)
+        const destinationKey = sourceKey.replace("tmp/", ""); // Extract the key after the bucket name
+
+        
+        if (!sourceKey) {
+            throw new Error("Invalid source URI. Could not extract the source key.");
+        }
+        console.log(sourceKey)
+        console.log(destinationKey)
+
+        // Define the copy source and destination
+        const copySource = sourceUri; // Format: "bucket-name/source-key"
+
+        // Create the CopyObjectCommand
+        const copyCommand = new CopyObjectCommand({
+            Bucket: bucketName, // Destination bucket
+            CopySource: copySource, // Source bucket and key
+            Key: destinationKey, // Destination key
+        });
+
+        // Execute the copy command
+        const response = await s3.send(copyCommand);
+        console.log("Image successfully copied:", response);
+
+        return destinationKey
+        
+    } catch (error) {
+        console.error("Error copying image:", error);
+        return {
+            success: false,
+            error: error.message,
+        };
+    }
+}
 
 app.get("/users/:id", authenticateToken, async (req, res) => {
     try {
@@ -167,7 +207,7 @@ app.post("/upload-test", authenticateToken, upload.single("image"), async (req, 
     try {
 
         const imageName = req.body.imageName || req.body["imageName"];
-        const heatmapPath = req.body.heatmap_uri;
+        const heatmapPath = await copyImageInS3(req.body.heatmap_uri);
         const userId = req.user.user_id; // Extract user ID from JWT
         const confidenceScore = req.body.confidenceScore
 
