@@ -1,0 +1,12 @@
+{
+    "Rules": [
+      {
+        "ID": "Delete temp files",
+        "Status": "Enabled",
+        "Prefix": "tmp/",
+        "Expiration": {
+          "Days": 1
+        }
+      }
+    ]
+  }

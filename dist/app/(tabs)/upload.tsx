@@ -12,6 +12,7 @@ import Constants from "expo-constants";
 // import HOST from "@/constants/Host";
 import { jwtDecode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const logo = require("@/assets/images/logo.png");
 const screenWidth = Dimensions.get("window").width;
@@ -55,7 +56,8 @@ export default function UploadScreen() {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [imageName, setImageName] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);  
+
 
   const takeImage = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -112,22 +114,48 @@ export default function UploadScreen() {
     }
   }, [isProcessing]); // Run only when selectedImage changes
 
-  const handleImage = (uri: string) => {
+  const handleImage = async (uri: string) => {
     setSelectedImage(uri);
     setIsProcessing(true); // Start processing
+    console.log("cat")
 
-    // Simulate processing delay (e.g., 3 seconds)
-    setTimeout(() => {
-      // TEMP: Generate a random AI probability (replace with actual computed value later)
-      const randomProbability = Math.random();
-      setAiPercent(randomProbability);
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+        alert("User not authenticated.");
+        setIsUploading(false);
+        return;
+    }
 
-      // Get category and phrase
-      const { phrase } = getCategoryAndPhrase(randomProbability);
-      setPhrase(phrase);
+    const decodedToken: any = jwtDecode(token);
+    const userId = decodedToken.user_id;
+    const formData = new FormData();
+    formData.append("userId", userId.toString()); // Send the user ID
+    formData.append("image", {
+      uri: uri,
+      type: "image/jpeg",
+      name: `${imageName.trim()}.jpg`,
+  } as any);
+  
 
-      setIsProcessing(false); // End processing
-    }, 3000); // Simulate a 3-second delay
+    const response = await axios.post(`${HOST}/analyze`, formData, {
+      headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data", // Axios automatically sets the boundary for FormData
+      },
+  });
+
+    console.log("response", response.data);
+
+    const { confidenceScore, imageUrl } = response.data;
+    setAiPercent(confidenceScore);
+    setSelectedImage(imageUrl);
+
+    const { phrase } = getCategoryAndPhrase(confidenceScore);
+    setPhrase(phrase);
+
+    setIsProcessing(false);
+   
+    
   };
 
   const captureAndShare = async () => {
@@ -164,14 +192,18 @@ export default function UploadScreen() {
         const userId = decodedToken.user_id;
         const formData = new FormData();
         formData.append("imageName", imageName.trim());
-        formData.append("confidenceScore", aiPercent.toString());
         formData.append("userId", userId.toString()); // Send the user ID
+        formData.append("heatmap_uri", selectedImage); // Send the user ID
+        formData.append("confidenceScore", aiPercent.toString());
         formData.append("image", {
             uri: selectedImage,
             type: "image/jpeg",
             name: `${imageName.trim()}.jpg`,
         } as any);
 
+
+
+        
         const response = await fetch(`${HOST}/upload-test`, {
             method: "POST",
             body: formData,
@@ -184,6 +216,7 @@ export default function UploadScreen() {
         const result = await response.json();
         if (result.success) {
             alert("Image and data uploaded successfully!");
+            setAiPercent(result.probability);
             setSelectedImage(null);
         } else {
             console.error("Upload Failed:", result.error);

@@ -10,6 +10,9 @@ require("dotenv").config();
 const multer = require("multer");
 const { S3Client } = require("@aws-sdk/client-s3");
 const multerS3 = require("multer-s3");
+const axios = require("axios");
+
+
 
 const app = express();
 app.use(express.json());
@@ -49,6 +52,20 @@ const upload = multer({
     }),
   });
 
+  const temp_upload = multer({
+    storage: multerS3({
+        s3: s3,
+        bucket: process.env.AWS_S3_BUCKET,
+        metadata: (req, file, cb) => {
+            cb(null, { fieldName: file.fieldname });
+        },
+        key: (req, file, cb) => {
+            const fileName = `tmp/${Date.now()}.jpg`; // Add the "tmp/" prefix
+            cb(null, fileName);
+        },
+    }),
+});
+
   // Middleware to verify JWT Token
   const authenticateToken = (req, res, next) => {
     const authHeader = req.headers["authorization"];
@@ -81,14 +98,78 @@ app.get("/users/:id", authenticateToken, async (req, res) => {
     }
 });
 
+app.post("/analyze", authenticateToken, temp_upload.single('image'), async (req, res) => {
+    console.log("catepillar")
+    console.log(req.body)
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: "Please upload a file" });
+        }
+        if (!req.user.user_id) {
+            return res.status(400).json({ error: "User authentication failed. No user ID found." });
+        }
+
+        console.log(req.file.location)
+        console.log(req.file.key)
+
+        
+        const data = {
+            inputs: {
+                image_name: req.file.key,
+            },
+        };
+        
+        try {
+            const response = await fetch(process.env.MODEL_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${process.env.HF_BEARER_TOKEN}`,
+                },
+                body: JSON.stringify(data), // Convert the data object to a JSON string
+            });
+        
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+        
+            const result = await response.json(); // Parse the JSON response
+            console.log(result);
+
+            const { probability, heatmap } = result[0].body;
+
+            confidenceScore = probability
+
+            const heatmapPath = `https://image-uploads-aida.s3.us-east-2.amazonaws.com/${heatmap}`;
+
+            res.json({
+                imageUrl: heatmapPath,
+                confidenceScore: probability,
+
+            });
+        } catch (error) {
+            console.error("Error making fetch call:", error);
+        }
+
+        
+    } catch (error) {
+        console.error("Upload error:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+
+});
+
+
 // Upload Image Route (need to replace the logic in server.js with this instead)
 // change "upload-test" to just upload here and within the respective pages as wewll
 app.post("/upload-test", authenticateToken, upload.single("image"), async (req, res) => {
+    console.log("Received upload request:", req.body);
     try {
 
         const imageName = req.body.imageName || req.body["imageName"];
+        const heatmapPath = req.body.heatmap_uri;
         const userId = req.user.user_id; // Extract user ID from JWT
-        const confidenceScore = parseFloat(req.body.confidenceScore) || 0.0; // Extract confidence score
+        const confidenceScore = req.body.confidenceScore
 
         if (!req.file) {
             return res.status(400).json({ error: "Please upload a file" });
@@ -102,7 +183,8 @@ app.post("/upload-test", authenticateToken, upload.single("image"), async (req, 
 
         // S3 Image URL
         const filePath = req.file.location; // Get S3 file URL
-        const heatmapPath = "placeholder_heatmap_path";
+
+        
 
         // Insert into Database (Image Table)
         const imageQuery = `
@@ -122,12 +204,16 @@ app.post("/upload-test", authenticateToken, upload.single("image"), async (req, 
         const logValues = [imageId, confidenceScore];
         const logResult = await pool.query(logQuery, logValues);
 
+        
+
+
         res.json({
             success: true,
-            message: "Image and analysis data uploaded successfully!",
-            imageUrl: filePath,
+            imageUrl: heatmapPath,
             databaseEntry: { image: imageResult.rows[0], log: logResult.rows[0] },
         });
+
+    
 
     } catch (error) {
         console.error("Upload error:", error);
