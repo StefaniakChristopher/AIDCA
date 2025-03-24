@@ -170,6 +170,7 @@ app.post("/analyze", authenticateToken, temp_upload.single('image'), async (req,
             });
         
             if (!response.ok) {
+                res.status(500).json({ error: "HF api error" });
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
         
@@ -189,6 +190,7 @@ app.post("/analyze", authenticateToken, temp_upload.single('image'), async (req,
             });
         } catch (error) {
             console.error("Error making fetch call:", error);
+            
         }
 
         

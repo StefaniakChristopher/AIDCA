@@ -19,16 +19,6 @@ export default function LoginScreen() {
   // mainly just using for functionality rn, ik its v plain
   // :)
 
-  // Change this later when back in server.js
-  const getApiUrl = () => {
-    if (Constants.expoConfig?.hostUri) {
-      const localIp = Constants.expoConfig.hostUri.split(":").shift();
-      return `http://${localIp}:3001`;
-    }
-    return "";
-  };
-  
-  const HOST = getApiUrl();
 
 const handleLogin = async () => {
   if (!isFormValid) return;

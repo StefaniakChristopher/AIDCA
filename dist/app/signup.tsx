@@ -29,16 +29,6 @@ export default function SignUpScreen() {
   const isPasswordValid = Object.values(passwordValidation).every(Boolean);
   const isFormValid = firstName && lastName && email && isPasswordValid && agree;
 
-  // Change/remove later when we get in server.js again
-const getApiUrl = () => {
-  if (Constants.expoConfig?.hostUri) {
-    const localIp = Constants.expoConfig.hostUri.split(":").shift();
-    return `http://${localIp}:3001`;
-  }
-  return "";
-};
-
-const HOST = getApiUrl();
 
 // Signup function
 const handleSignUp = async () => {

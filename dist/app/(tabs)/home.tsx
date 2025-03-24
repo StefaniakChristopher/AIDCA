@@ -13,24 +13,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { TAB_BAR_HEIGHT } from "./_layout";
 import { useRouter } from "expo-router";
-// import HOST from "@/constants/Host";
+import HOST from "@/constants/Host";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 import Constants from "expo-constants";
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
-
-  // Change this later when back in server.js
-  const getApiUrl = () => {
-    if (Constants.expoConfig?.hostUri) {
-      const localIp = Constants.expoConfig.hostUri.split(":").shift();
-      return `http://${localIp}:3001`;
-    }
-    return "";
-  };
-  
-  const HOST = getApiUrl();
 
 const getImageHeight = (imageUrl: string, desiredWidth: number): Promise<number> => {
   return new Promise((resolve) => {

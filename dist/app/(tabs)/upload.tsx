@@ -9,24 +9,13 @@ import { Dimensions } from "react-native";
 import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 import Constants from "expo-constants";
-// import HOST from "@/constants/Host";
+import HOST from "@/constants/Host";
 import { jwtDecode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 const logo = require("@/assets/images/logo.png");
 const screenWidth = Dimensions.get("window").width;
-
-// change back later
-const getApiUrl = () => {
-  if (Constants.expoConfig?.hostUri) {
-    const localIp = Constants.expoConfig.hostUri.split(":").shift();
-    return `http://${localIp}:3001`;
-  }
-  return "";
-};
-
-const HOST = getApiUrl();
 
 export default function UploadScreen() {
   const viewShotRef = useRef<ViewShot>(null);
@@ -138,15 +127,16 @@ export default function UploadScreen() {
       name: `${imageName.trim()}.jpg`,
   } as any);
   
-
+  try {
     const response = await axios.post(`${HOST}/analyze`, formData, {
       headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "multipart/form-data", // Axios automatically sets the boundary for FormData
       },
+      
   });
 
-    console.log("response", response.data);
+  console.log("response", response.data);
 
     const { confidenceScore, imageUrl } = response.data;
     setAiPercent(confidenceScore);
@@ -156,7 +146,11 @@ export default function UploadScreen() {
     setPhrase(phrase);
 
     setIsProcessing(false);
-   
+  } catch (error) {
+    console.error("Error analyzing image:", error);
+    alert("Error analyzing image.");
+    setIsProcessing(false);
+  }
     
   };
 
