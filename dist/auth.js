@@ -111,7 +111,7 @@ async function copyImageInS3(sourceUri) {
         const response = await s3.send(copyCommand);
         console.log("Image successfully copied:", response);
 
-        return destinationKey
+        return `https://image-uploads-aida.s3.us-east-2.amazonaws.com/${destinationKey}`
         
     } catch (error) {
         console.error("Error copying image:", error);

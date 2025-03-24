@@ -50,6 +50,7 @@ export default function UploadScreen() {
   };
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedOGImage, setSelectedOGImage] = useState<string | null>(null);
   const [aiPercent, setAiPercent] = useState<number>(0); // Default to 0 instead of null
   const [phrase, setPhrase] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false); // New state for loading screen
@@ -115,7 +116,8 @@ export default function UploadScreen() {
   }, [isProcessing]); // Run only when selectedImage changes
 
   const handleImage = async (uri: string) => {
-    setSelectedImage(uri);
+
+    setSelectedOGImage(uri);
     setIsProcessing(true); // Start processing
     console.log("cat")
 
@@ -196,7 +198,7 @@ export default function UploadScreen() {
         formData.append("heatmap_uri", selectedImage); // Send the user ID
         formData.append("confidenceScore", aiPercent.toString());
         formData.append("image", {
-            uri: selectedImage,
+            uri: selectedOGImage,
             type: "image/jpeg",
             name: `${imageName.trim()}.jpg`,
         } as any);
