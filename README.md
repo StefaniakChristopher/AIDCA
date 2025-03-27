@@ -14,9 +14,9 @@ AIDA (AI Detection App) is a mobile application that allows users to scan physic
 
 All the different pages go here.
 
-![SegmentedImage](aidca/assets/ImageSegmentation.png)
+![SegmentedImage](assets/ImageSegmentation.png)
 
-![HeatmapImage](aidca/assets/heatmap.png)
+![HeatmapImage](assets/heatmap.png)
 
 ---
 
