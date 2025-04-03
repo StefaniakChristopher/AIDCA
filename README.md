@@ -32,6 +32,31 @@ All the different pages go here.
 
 ## 🛠️ How to Run
 
+1. Clone the repostory in a new folder.
+
+2. cd into the dist folder
+cd dist
+
+3. Have Node.js installed and install expo
+npm install -g expo-cli
+
+4. run npm install, and npm update if there are any outdated packages.
+npm install
+npm update
+
+5. start the app. Download any necessary packages.
+npx expo start
+
+6. Download Expo Go on your iPhone and scan the QR code to simulate the app
+https://apps.apple.com/us/app/expo-go/
+
+7. create a .env file with the following tokens: 
+DATABASE_URL
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_REGION
+AWS_S3_BUCKET
+HF_BEARER_TOKEN
 
 
 ---

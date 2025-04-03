@@ -114,7 +114,7 @@ const handleLogin = async () => {
         disabled={!isFormValid}
         onPress={handleLogin}
       >
-        <Text className="text-white text-center text-lg">Log in</Text>
+        <Text className="text-white font-bold text-center text-lg">Log in</Text>
       </TouchableOpacity>
 
       {/* Sign Up Link */}
