@@ -1,0 +1,6 @@
+/__pycache__
+/venv
+/weights
+u2net.pth
+AIArtDetection.pth
+/src/__pycache__

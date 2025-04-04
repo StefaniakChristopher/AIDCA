@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "AIDA_Network"
+version = "1.0.0"
+description = "A U^2 network coupled with a CNN to determine if an image is AI generated."
+authors = [
+    {name = "Luke Renchik, Zach Lain", email = "lukerenchik@gmail.com"}
+]
+dependencies = [
+    "pillow",
+    "torch>=1.7.0",
+    "torchvision>=0.8.0",
+    "opencv-python>=4.5.3.56",
+    "numpy>=1.19.5" 
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/AIDA_Network", "README.md", "LICENSE"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/AIDA_Network"]
+
+[project.urls]
+Homepage = "https://github.com/lukerenchik/AIDA_Network"
