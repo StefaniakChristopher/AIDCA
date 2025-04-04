@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 import Constants from "expo-constants";
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
+// Removed duplicate import of useCallback
+import { useNavigation } from "@react-navigation/native"; // Import navigation hook
 
 const getImageHeight = (imageUrl: string, desiredWidth: number): Promise<number> => {
   return new Promise((resolve) => {
@@ -27,7 +28,7 @@ const getImageHeight = (imageUrl: string, desiredWidth: number): Promise<number>
       Image.getSize(
         imageUrl,
         (width, height) => {
-          // Calculate height while maintaining aspect ratio
+// Calculate height while maintaining aspect ratio
           const aspectRatio = width / height;
           const calculatedHeight = desiredWidth / aspectRatio;
           resolve(calculatedHeight);
@@ -38,7 +39,7 @@ const getImageHeight = (imageUrl: string, desiredWidth: number): Promise<number>
         }
       );
     } else {
-      // For local images (using require)
+// For local images (using require)
       resolve(200); // Default height for local images
     }
   });
@@ -53,7 +54,7 @@ const fetchImageData = async () => {
     }
     const response = await axios.get(`${HOST}/images`, {
       headers: {
-        "Authorization": `Bearer ${token}`,  
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -64,24 +65,13 @@ const fetchImageData = async () => {
   }
 };
 
-// example images
-const defaultImages = [
-  { image_id: 1, file_path: require("@/assets/images/A.jpg"), confidence_score: "95" },
-  { image_id: 2, file_path: require("@/assets/images/B.png"), confidence_score: "10" },
-  { image_id: 3, file_path: require("@/assets/images/C.jpg"), confidence_score: "10" },
-  { image_id: 4, file_path: require("@/assets/images/D.png"), confidence_score: "10" },
-  { image_id: 5, file_path: require("@/assets/images/E.jpg"), confidence_score: "10" },
-  { image_id: 6, file_path: require("@/assets/images/F.jpg"), confidence_score: "10" },
-  // Add more images as needed
-];
-
 const App = () => {
-
-  const [images, setImages] = useState(defaultImages);
+  const [images, setImages] = useState<any[]>([]); // Initialize images as an empty array
 
   const [userFirstName, setUserFirstName] = useState("User");
 
-  // Function to fetch updated images when navigating back
+  const navigation = useNavigation(); // Use navigation hook
+
   useFocusEffect(
     useCallback(() => {
       const fetchUpdatedImages = async () => {
@@ -98,9 +88,7 @@ const App = () => {
     }, [])
   );
 
-  // Used to grab users first name and display on the top of the home page, based on the id that is logged in
   useEffect(() => {
-
     const getUserFirstName = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
@@ -108,8 +96,7 @@ const App = () => {
           console.error("No token found");
           return;
         }
-  
-        // Decode JWT token to get first_name
+
         const decodedToken: any = jwtDecode(token);
         if (decodedToken.first_name) {
           setUserFirstName(decodedToken.first_name);
@@ -120,10 +107,10 @@ const App = () => {
         console.error("Error extracting user first name:", error);
       }
     };
-  
+
     getUserFirstName();
   }, []);
-  
+
   useEffect(() => {
     const loadImages = async () => {
       try {
@@ -132,7 +119,7 @@ const App = () => {
           setImages(data.images);
         } else {
           console.error("No images found.");
-          setImages([]); // stays empty if no images exist
+          setImages([]);
         }
       } catch (error) {
         console.error("Error loading images:", error);
@@ -141,11 +128,11 @@ const App = () => {
 
     loadImages();
   }, []);
-  
+
   const distributeImages = (images: any) => {
     const thinCards: any = [];
     const thickCards: any = [];
-  
+
     images.forEach((image: any, index: any) => {
       if (index % 2 === 0) {
         thinCards.push(image);
@@ -153,10 +140,10 @@ const App = () => {
         thickCards.push(image);
       }
     });
-  
+
     return { thinCards, thickCards };
   };
-  
+
   const { thinCards, thickCards } = distributeImages(images);
 
   const router = useRouter();
@@ -168,9 +155,9 @@ const App = () => {
         <Text className="text-4xl [font-family:'ClimateCrisis'] text-fontColorPrimary">
           AIDA
         </Text>
-        {/* Show user’s first name */}
+{/* Show user’s first name */}
         <View className="flex items-end">
-          <Text className="text-white text-2xl [font-family:'Inter'] font-bold">
+          <Text className="text-backgroundSecondary text-xl [font-family:'Inter'] font-light">
             Welcome, {userFirstName}!
           </Text>
           <Text className="text-white text-2xl [font-family:'Inter'] font-bold ">
@@ -183,14 +170,13 @@ const App = () => {
       {/* Masonry Layout / No Images Message */}
       <View className="flex-1">
         {images.length === 0 ? (
-          // Show this when no images are found
+// Show this when no images are found
           <View className="flex-1 justify-center items-center">
             <Text className="text-white text-2xl [font-family:'Inter'] font-bold">
               Start testing to fill your gallery!
             </Text>
           </View>
         ) : (
-          // Show gallery if images exist
           <ScrollView contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT }}>
             <View className="flex flex-row justify-between mx-4">
               <View className="flex flex-col">
@@ -200,6 +186,8 @@ const App = () => {
                     label={image.confidence_score}
                     isChecked={true}
                     imageUrl={image.file_path}
+                    imageData={image} // Pass image data
+                    navigation={navigation} // Pass navigation
                   />
                 ))}
               </View>
@@ -209,6 +197,8 @@ const App = () => {
                     key={image.image_id}
                     label={image.confidence_score}
                     imageUrl={image.file_path}
+                    imageData={image} // Pass image data
+                    navigation={navigation} // Pass navigation
                   />
                 ))}
               </View>
@@ -221,8 +211,8 @@ const App = () => {
 };
 
 // @ts-ignore
-const ThinCard = ({ label, isChecked, imageUrl }) => {
-  const [imageHeight, setImageHeight] = useState<number | null>(null)
+const ThinCard = ({ label, isChecked, imageUrl, imageData, navigation }) => {
+  const [imageHeight, setImageHeight] = useState<number | null>(null);
 
   useEffect(() => {
     getImageHeight(imageUrl, 150).then((height) => {
@@ -230,32 +220,35 @@ const ThinCard = ({ label, isChecked, imageUrl }) => {
     });
   }, [imageUrl]);
 
-  
   return (
-    <ImageBackground
+    <TouchableOpacity
+      onPress={() => navigation.navigate("details", { imageData })} // Navigate to details screen
+    >
+      <ImageBackground
       source={{ uri : imageUrl }}
       style={{ height:  imageHeight}}
-      imageStyle={{ borderRadius: 10 }}
+        imageStyle={{ borderRadius: 10 }}
       className=" rounded-lg m-1.5 w-40 flex justify-end items-end"
-    >
-      <View
-        className={`${label > 0.50
-            ? "bg-fontColorPrimary text-white"
-            : " bg-fontColorSecondary text-backgroundPrimary"
-          } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
       >
-        {label > 0.50 ? <Ionicons name="checkmark-sharp" size={14} color="white" /> : <FontAwesome6 name="xmark" size={14} />}
-        <Text className={`ml-2 ${label > 0.5 ? "text-white" : "text-backgroundPrimary"}`}>
-          {label * 100}% AI
-        </Text>
-      </View>
-    </ImageBackground>
+        <View
+          className={`${label > 0.50
+              ? "bg-fontColorPrimary text-white"
+              : " bg-fontColorSecondary text-backgroundPrimary"
+            } py-1 px-2 rounded-md flex flex-row justify-between items-center`}
+        >
+          {label > 0.50 ? <Ionicons name="checkmark-sharp" size={14} color="white" /> : <FontAwesome6 name="xmark" size={14} />}
+          <Text className={`ml-2 ${label > 0.5 ? "text-white" : "text-backgroundPrimary"}`}>
+            {label * 100}% AI
+          </Text>
+        </View>
+      </ImageBackground>
+    </TouchableOpacity>
   );
 };
 
 // @ts-ignore
-const ThickCard = ({ label, imageUrl }) => {
-  const [imageHeight, setImageHeight] = useState<number | null>(null)
+const ThickCard = ({ label, imageUrl, imageData, navigation }) => {
+  const [imageHeight, setImageHeight] = useState<number | null>(null);
 
   useEffect(() => {
     getImageHeight(imageUrl, 150).then((height) => {
@@ -264,7 +257,9 @@ const ThickCard = ({ label, imageUrl }) => {
   }, [imageUrl]);
 
   return (
-    <View>
+    <TouchableOpacity
+      onPress={() => navigation.navigate("details", { imageData })} // Navigate to details screen
+    >
       <ImageBackground
         source={{ uri : imageUrl }}
         style={{ height: imageHeight }}
@@ -285,7 +280,7 @@ const ThickCard = ({ label, imageUrl }) => {
 
         </View>
       </ImageBackground>
-    </View>
+    </TouchableOpacity>
   );
 };
 

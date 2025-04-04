@@ -137,6 +137,38 @@ app.get("/users/:id", authenticateToken, async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+app.delete("/images/:id", authenticateToken, async (req, res) => {
+    try {
+      const imageId = req.params.id;
+      const userId = req.user.user_id; // Ensure the user owns the image
+  
+      // Delete the analysis log first (foreign key dependency)
+      const deleteAnalysisLogQuery = `
+        DELETE FROM analysis_log
+        WHERE image_id = $1
+        AND image_id IN (
+          SELECT image_id FROM image WHERE user_id = $2
+        );
+      `;
+      await pool.query(deleteAnalysisLogQuery, [imageId, userId]);
+  
+      // Delete the image
+      const deleteImageQuery = `
+        DELETE FROM image
+        WHERE image_id = $1 AND user_id = $2;
+      `;
+      const result = await pool.query(deleteImageQuery, [imageId, userId]);
+  
+      if (result.rowCount === 0) {
+        return res.status(404).json({ success: false, error: "Image not found or not authorized" });
+      }
+  
+      res.json({ success: true, message: "Image deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  });
 
 app.post("/analyze", authenticateToken, temp_upload.single('image'), async (req, res) => {
     console.log("catepillar")
@@ -269,7 +301,7 @@ app.get("/images", authenticateToken, async (req, res) => {
       const userId = req.user.user_id;  // Extract user ID from JWT
   
       const imageQuery = `
-        SELECT i.image_id, i.file_path, a.confidence_score
+        SELECT i.image_id, i.file_path, a.confidence_score, i.file_path_heatmap, i.file_name
         FROM image i
         JOIN analysis_log a ON i.image_id = a.image_id
         WHERE i.user_id = $1;
@@ -296,14 +328,17 @@ app.post("/signup", async (req, res) => {
         // Hash the password before storing it
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Create the username by concatenating first and last name
+        const username = `${firstName}_${lastName}`;
+
         // Insert the new user into the database
         const query = `
             INSERT INTO users (username, first_name, last_name, email, password, created_at)
             VALUES ($1, $2, $3, $4, $5, NOW())
-            RETURNING user_id, first_name, email;
+            RETURNING user_id, first_name, email, username;
         `;
 
-        const values = [`${firstName}_${lastName}`, firstName, lastName, email, hashedPassword];
+        const values = [username, firstName, lastName, email, hashedPassword];
         const result = await pool.query(query, values);
 
         if (result.rows.length === 0) {
@@ -312,9 +347,14 @@ app.post("/signup", async (req, res) => {
 
         const newUser = result.rows[0];
 
-        // Generate JWT Token for the new user
+        // Generate JWT Token for the new user including username
         const token = jwt.sign(
-            { user_id: newUser.user_id, email: newUser.email, first_name: newUser.first_name },
+            { 
+                user_id: newUser.user_id, 
+                email: newUser.email, 
+                first_name: newUser.first_name,
+                username: newUser.username  // Add username to the token payload
+            },
             JWT_SECRET,
             { expiresIn: "24h" }
         );
@@ -353,7 +393,7 @@ app.post("/login", async (req, res) => {
 
         // Generate JWT Token
         const token = jwt.sign(
-            { user_id: user.user_id, email: user.email, first_name: user.first_name }, 
+            { user_id: user.user_id, email: user.email, first_name: user.first_name, username: user.username }, 
             JWT_SECRET, 
             { expiresIn: "24h" }
         );
