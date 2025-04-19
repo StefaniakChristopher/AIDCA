@@ -64,18 +64,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <EvilIcons
-              name="gear"
-              size={28}
-              color={focused ? "white" : "rgba(255,255,255,0.6)"}
-            />
-          ),
-        }}
-      />
+      
       <Tabs.Screen
         name="profile"
         options={{
